@@ -1,0 +1,244 @@
+
+/* ===== GENERAL USER DASHBOARD ===== */
+.user_side {
+  max-width: 1200px;
+  margin: 25px auto;
+  padding: 25px;
+  color: #263248;
+  font-family: Arial, sans-serif;
+}
+
+.user_side h1 {
+  color: #233d79;
+  font-size: 30px;
+  margin-bottom: 8px;
+}
+
+.user_side h2 {
+  color: #3156a6;
+  margin-bottom: 25px;
+}
+
+.user_side h3 {
+  color: #3156a6;
+  margin-top: 0;
+}
+
+.user_side .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin-bottom: 25px;
+  align-items: start;
+}
+
+.user_side .panel {
+  background: #ffffff;
+  padding: 24px;
+  border: 1px solid #e1e7f0;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 15px rgba(35, 61, 121, 0.08);
+}
+
+.user_side .panel h3 {
+  font-size: 19px;
+  margin-bottom: 18px;
+}
+
+.user_side input {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border: 1px solid #cbd4e2;
+  border-radius: 7px;
+  font-size: 15px;
+  color: #263248;
+  background: #ffffff;
+  outline: none;
+  transition: 0.2s;
+}
+
+.user_side input:focus {
+  border-color: #3156a6;
+  box-shadow: 0 0 0 3px rgba(49, 86, 166, 0.12);
+}
+
+.user_side button {
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 7px;
+  background: #3156a6;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.user_side button:hover {
+  background: #233d79;
+  transform: translateY(-1px);
+}
+
+.user_side button.secondary {
+  background: #16815f;
+}
+
+.user_side button.secondary:hover {
+  background: #106548;
+}
+
+.user_side .message {
+  padding: 13px 16px;
+  margin-bottom: 20px;
+  border-left: 4px solid #3156a6;
+  border-radius: 6px;
+  background: #e8efff;
+  color: #233d79;
+  overflow-wrap: anywhere;
+}
+
+
+.user_side .book-grid {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(220px, 1fr)
+  );
+  gap: 18px;
+}
+
+.user_side .book-card {
+  padding: 20px;
+  background: #fbfcff;
+  border: 1px solid #e0e6f1;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.user_side .book-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 20px rgba(35, 61, 121, 0.12);
+}
+
+.user_side .book-card h3 {
+  color: #3156a6;
+  font-size: 19px;
+  margin-bottom: 14px;
+}
+
+.user_side .book-card p {
+  margin: 9px 0;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.user_side .borrow-info {
+  padding: 10px 12px;
+  margin-top: 12px;
+  border-radius: 7px;
+  background: #fff3dc;
+  color: #805400;
+}
+
+.user_side .borrow-info p {
+  margin: 0;
+}
+
+.user_side .status-borrowed {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 5px;
+  background: #fff0d5;
+  color: #8b5700;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.user_side .status-available {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 5px;
+  background: #dcf8e8;
+  color: #11643b;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.user_side .table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.user_side table {
+  width: 100%;
+  min-width: 550px;
+  border-collapse: collapse;
+  background: white;
+}
+
+.user_side table th,
+.user_side table td {
+  padding: 14px;
+  text-align: left;
+  border-bottom: 1px solid #e1e7f0;
+}
+
+.user_side table th {
+  background: #edf1fa;
+  color: #233d79;
+  font-size: 14px;
+}
+
+.user_side table td {
+  font-size: 14px;
+}
+
+.user_side table tbody tr:hover {
+  background: #f5f7fc;
+}
+
+/* ===== LOGOUT BUTTON ===== */
+.user_side .logout-button {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 12px 24px;
+  background: #c43d4b;
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 7px;
+  transition: 0.2s;
+}
+
+.user_side .logout-button:hover {
+  background: #9f2634;
+}
+
+@media (max-width: 700px) {
+  .user_side {
+    margin: 15px auto;
+    padding: 14px;
+  }
+
+  .user_side h1 {
+    font-size: 25px;
+  }
+
+  .user_side .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user_side .panel {
+    padding: 17px;
+  }
+
+  .user_side .book-grid {
+    grid-template-columns: 1fr;
+  }
+}

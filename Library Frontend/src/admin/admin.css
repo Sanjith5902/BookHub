@@ -1,0 +1,188 @@
+
+
+.admin_side {
+  min-height: 100vh;
+  padding: 30px;
+  background: #f4f6fb;
+  font-family: Arial, sans-serif;
+  color: hsl(243, 23%, 18%);
+}
+
+.admin_side h1 {
+  text-align: center;
+  color: #3156a6;
+  margin-bottom: 10px;
+  font-size: 32px;
+}
+
+.admin_side h2 {
+  text-align: center;
+  color: #555;
+  margin-bottom: 30px;
+  font-size: 23px;
+}
+
+.admin_side h3 {
+  color: #3156a6;
+  margin-bottom: 20px;
+}
+
+.admin_side .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 25px;
+  margin-bottom: 25px;
+}
+
+.admin_side .panel {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  margin-bottom: 25px;
+}
+
+.admin_side form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.admin_side input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d4d4df;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.admin_side input:focus {
+  border-color: #3156a6;
+  box-shadow: 0 0 0 3px rgba(142, 54, 149, 0.12);
+}
+
+.admin_side button {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #3156a6, #3f1375);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.admin_side button:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+.admin_side button.danger {
+  background: #dc3545;
+  margin-top: 10px;
+}
+
+.admin_side button.danger:hover {
+  background: #b02a37;
+}
+
+.admin_side .message {
+  padding: 12px 16px;
+  background: #e9f7ef;
+  color: #176b3a;
+  border-left: 4px solid #28a745;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+/* Book Cards Layout */
+.admin_side .book-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+/* Individual Book Card */
+.admin_side .book-card {
+  background: #ffffff;
+  border: 1px solid #e6e1eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  overflow-wrap: anywhere;
+}
+
+.admin_side .book-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 7px 18px rgba(96, 18, 100, 0.12);
+}
+
+.admin_side .book-card h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+.admin_side .book-card p {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 8px 0;
+}
+
+.admin_side .book-card strong {
+  color: #333;
+}
+
+.admin_side .logout-button {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 24px;
+  background: #eb474d;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.admin_side .logout-button:hover {
+  background: #a31c25;
+}
+
+@media (max-width: 900px) {
+  .admin_side .book-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin_side .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .admin_side {
+    padding: 15px;
+  }
+
+  .admin_side h1 {
+    font-size: 26px;
+  }
+
+  .admin_side h2 {
+    font-size: 20px;
+  }
+
+  .admin_side .panel {
+    padding: 18px;
+  }
+
+  .admin_side .book-grid {
+    grid-template-columns: 1fr;
+  }
+}
