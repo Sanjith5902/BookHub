@@ -1,4 +1,4 @@
-# Abstract – LearnHub
+# Abstract – BookHub
 ##
 
 LearnHub is a web-based Education Management System developed using the MERN Stack (MongoDB, Express.js, React.js, and Node.js) to provide an interactive and efficient online learning platform. The system is designed with separate Trainer and Student portals, enabling seamless management of courses, learning materials, assessments, and student progress.
