@@ -10,6 +10,11 @@
   background: linear-gradient(135deg, #f3e8ff, #efe7fc, #e0e7ff);
   font-family: Arial, sans-serif;
 }
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+} 
 
 
 .login-card {

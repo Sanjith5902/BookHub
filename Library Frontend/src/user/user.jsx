@@ -1,73 +1,155 @@
 
-import { useState,useContext } from 'react';
-import {NavLink} from 'react-router';
-import { bookContext } from '../context';
-import './user.css';
+import { useState, useContext } from "react";
+import { useNavigate } from "react-router";
+import axios from "axios";
+import { bookContext } from "../context.jsx";
+import "./user.css";
+
 function UserSide() {
-  const{books, borrowBook, returnBook}=useContext(bookContext);
-  const [bookId, setBookId] = useState('');
-  const [userId, setUserId] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [message, setMessage] = useState('');
+  const user_name=localStorage.getItem("username")
+ const { books, fetchBooks } = useContext(bookContext);
+const userName = localStorage.getItem("userName") || "User";
+  const [bookId, setBookId] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const [borrowedDetails, setBorrowedDetails] = useState(null);
+  const navigate = useNavigate();
+
+  const userId = localStorage.getItem("userId") || "";
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("userId");
+
+    localStorage.removeItem("username");
+    navigate("/", { replace: true });
+  };
+
   
-  const handleBorrow = (e) => {
-    e.preventDefault();
+const handleBorrow = async (e) => {
+  e.preventDefault();
 
-    const result = borrowBook(bookId, userId);
-    setMessage(result.message);
+  if (!userId) {
+    setMessage("Please log in again.");
+    return;
+  }
 
-    if (result.success) {
-      setBorrowedDetails({
-        bookId: Number(bookId),
-        userId: userId.trim(),
-        action: 'Borrowed'
-      });
+  try {
+    setLoading(true);
+    setMessage("");
 
-      setBookId('');
-    }
-  };
+    const response = await axios.post(
+      `http://localhost:3000/borrowbook/${bookId}`,
+      { userId },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      }
+    );
 
-  const handleReturn = (e) => {
-    e.preventDefault();
+    setMessage(response.data.message || "Book borrowed successfully.");
+    setBookId("");
+    await fetchBooks();
+  } catch (error) {
+    setMessage(
+      error.response?.data?.message || "Failed to borrow book."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
-    const result = returnBook(bookId, userId);
-    setMessage(result.message);
 
-    if (result.success) {
-      setBorrowedDetails({
-        bookId: Number(bookId),
-        userId: userId.trim(),
-        action: 'Returned'
-      });
+  
+const handleReturn = async (e) => {
+  e.preventDefault();
 
-      setBookId('');
-    }
-  };
+  if (!bookId) {
+    setMessage("Enter a Book ID first.");
+    return;
+  }
 
-  const filteredBooks = books.filter(book => {
+  if (!userId) {
+    setMessage("Please log in again.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setMessage("");
+
+    const response = await axios.put(
+      `http://localhost:3000/returnbook/${bookId}`,
+      { userId },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      }
+    );
+
+    setMessage(response.data.message || "Book returned successfully.");
+    setBookId("");
+    await fetchBooks();
+  } catch (error) {
+    setMessage(
+      error.response?.data?.message || "Failed to return book."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+  const filteredBooks = books.filter((book) => {
     const query = searchQuery.toLowerCase().trim();
 
     return (
-      book.title.toLowerCase().includes(query) ||
-      book.author.toLowerCase().includes(query) ||
-      book.genre.toLowerCase().includes(query) ||
-      String(book.id).includes(query)
+      (book.title || "").toLowerCase().includes(query) ||
+      (book.author || "").toLowerCase().includes(query) ||
+      (book.genre || "").toLowerCase().includes(query) ||
+      String(book._id || book.id || "").includes(query)
     );
   });
 
+  // Display books borrowed by this user only.
+  // This assumes borrowedBy stores the user's ID as a string.
   const borrowedBooks = books.filter(
-    book => book.borrowedBy !== null
+    (book) =>
+      book.borrowedBy != null &&
+      String(
+        typeof book.borrowedBy === "object"
+          ? book.borrowedBy._id
+          : book.borrowedBy
+      ) === String(userId)
   );
 
   return (
-    <>
-    <div className="user_side">
-      <h1>Welcome to Library</h1>
-      <h2>User Dashboard</h2>
+  <div className="user_side">
+    <nav className="user-navbar">
+      <h2 className="brand">BookHub</h2>
 
-      {message && <p className="message">{message}</p>}
+      <div className="navbar-right">
+        <span className="welcome-user">
+          Welcome, {user_name}
+        </span>
+
+        <button
+          className="logout-button"
+          onClick={handleLogout}
+        >
+          Logout
+        </button>
+      </div>
+    </nav>
+
+    <h1>Welcome to Library</h1>
+    <h2>User Dashboard</h2>
+
+    {message && <p className="message">{message}</p>}
 
       <div className="form-grid">
         <section className="panel">
@@ -75,27 +157,22 @@ function UserSide() {
 
           <form onSubmit={handleBorrow}>
             <input
-              type="number"
-              min="1"
-              placeholder="Book ID"
+              type="text"
+              placeholder="Book MongoDB ID"
               value={bookId}
-              onChange={e => setBookId(e.target.value)}
+              onChange={(e) => setBookId(e.target.value)}
               required
             />
 
-            <input
-              placeholder="User ID"
-              value={userId}
-              onChange={e => setUserId(e.target.value)}
-              required
-            />
-
-            <button type="submit">Borrow Book</button>
+            <button type="submit" disabled={loading}>
+              {loading ? "Please wait..." : "Borrow Book"}
+            </button>
 
             <button
               type="button"
               className="secondary"
               onClick={handleReturn}
+              disabled={loading}
             >
               Return Book
             </button>
@@ -109,7 +186,7 @@ function UserSide() {
             type="text"
             placeholder="Search by title, author, genre or ID"
             value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
 
           <p>
@@ -125,28 +202,26 @@ function UserSide() {
           <p>No matching books found.</p>
         ) : (
           <div className="book-grid">
-            {filteredBooks.map(book => (
-              <div className="book-card" key={book.id}>
+            {filteredBooks.map((book) => (
+              <div className="book-card" key={book._id || book.id}>
                 <h3>{book.title}</h3>
-                <p><strong>Book ID:</strong> {book.id}</p>
-                <p><strong>Author:</strong> {book.author}</p>
-                <p><strong>Genre:</strong> {book.genre}</p>
 
                 <p>
-                  <strong>Status:</strong>{' '}
-                  {book.borrowedBy
-                    ? 'Borrowed'
-                    : 'Available'}
+                  <strong>Book ID:</strong> {book._id || book.id}
                 </p>
 
-                {book.borrowedBy && (
-                  <div className="borrow-info">
-                    <p>
-                      <strong>Borrowed by User ID:</strong>{' '}
-                      {book.borrowedBy}
-                    </p>
-                  </div>
-                )}
+                <p>
+                  <strong>Author:</strong> {book.author}
+                </p>
+
+                <p>
+                  <strong>Genre:</strong> {book.genre}
+                </p>
+
+                <p>
+                  <strong>Status:</strong>{" "}
+                  {book.borrowedBy ? "Borrowed" : "Available"}
+                </p>
               </div>
             ))}
           </div>
@@ -154,10 +229,10 @@ function UserSide() {
       </section>
 
       <section className="panel">
-        <h3>Current Borrowing Details ({borrowedBooks.length})</h3>
+        <h3>My Borrowed Books ({borrowedBooks.length})</h3>
 
         {borrowedBooks.length === 0 ? (
-          <p>No books are currently borrowed.</p>
+          <p>You have no borrowed books currently.</p>
         ) : (
           <div className="table-wrapper">
             <table>
@@ -166,18 +241,16 @@ function UserSide() {
                   <th>Book ID</th>
                   <th>Book Title</th>
                   <th>Author</th>
-                  <th>User ID</th>
                   <th>Status</th>
                 </tr>
               </thead>
 
               <tbody>
-                {borrowedBooks.map(book => (
-                  <tr key={book.id}>
-                    <td>{book.id}</td>
+                {borrowedBooks.map((book) => (
+                  <tr key={book._id || book.id}>
+                    <td>{book._id || book.id}</td>
                     <td>{book.title}</td>
                     <td>{book.author}</td>
-                    <td>{book.borrowedBy}</td>
                     <td>
                       <span className="status-borrowed">
                         Borrowed
@@ -189,20 +262,10 @@ function UserSide() {
             </table>
           </div>
         )}
-
-        {borrowedDetails && (
-          <p className="message">
-            Last action: {borrowedDetails.action} — Book ID{' '}
-            {borrowedDetails.bookId}, User ID{' '}
-            {borrowedDetails.userId}.
-          </p>
-        )}
       </section>
-       <NavLink to="/" className="logout-button">
-          Logout
-        </NavLink>
-        </div>
-    </>
+
+     
+    </div>
   );
 }
 

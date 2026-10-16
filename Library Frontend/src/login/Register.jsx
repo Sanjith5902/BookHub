@@ -50,7 +50,7 @@ const response = await axios.post(
         number: phone,
         email: email,
         password: password,
-        confirmpass: confirmPassword
+        
     }
 );
     err.success = response.data.message;

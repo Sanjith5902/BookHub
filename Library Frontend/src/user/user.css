@@ -48,7 +48,7 @@
 
 .user_side input {
   display: block;
-  width: 100%;
+  width: 95%;
   padding: 12px 14px;
   margin-bottom: 12px;
   border: 1px solid #cbd4e2;
@@ -203,7 +203,6 @@
   background: #f5f7fc;
 }
 
-/* ===== LOGOUT BUTTON ===== */
 .user_side .logout-button {
   display: inline-block;
   margin-top: 5px;
@@ -240,5 +239,70 @@
 
   .user_side .book-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+.user-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 28px;
+  margin-bottom: 25px;
+  background: #325d4b;
+  color: white;
+  border-radius: 12px;
+}
+
+.user-navbar .brand {
+  color: #ffffff;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.welcome-user {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.logout-button {
+  padding: 9px 18px;
+  background: #ffffff;
+  color: #243c32;
+  border: none;
+  border-radius: 7px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background: #e5eee8;
+}
+
+@media (max-width: 480px) {
+  .user-navbar {
+    padding: 14px;
+  }
+
+  .user-navbar .brand {
+    font-size: 20px;
+  }
+
+  .navbar-right {
+    gap: 8px;
+  }
+
+  .welcome-user {
+    font-size: 12px;
+  }
+
+  .logout-button {
+    padding: 8px 10px;
   }
 }

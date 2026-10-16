@@ -1,150 +1,226 @@
 
-import { useState,useContext } from 'react';
-import {NavLink} from 'react-router';
+import axios from 'axios';
+import { useState, useContext } from 'react';
+import { NavLink, useNavigate } from 'react-router';
 import { bookContext } from '../context';
 import './admin.css';
+
 function AdminSide() {
-  const{books,
-  addBook,
-  updateBook,
-  deleteBook}=useContext(bookContext);
+  const { books, fetchBooks } = useContext(bookContext);
+
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [genre, setGenre] = useState('');
+  const [isbncode, setIsbn] = useState('');
 
-  const [bookId, setBookId] = useState('');
-  const [newTitle, setNewTitle] = useState('');
-  const [newAuthor, setNewAuthor] = useState('');
-  const [newGenre, setNewGenre] = useState('');
+  const [editingBook, setEditingBook] = useState(null);
+  const navigate= useNavigate();
+  const [editForm, setEditForm] = useState({
+    title: '',
+    author: '',
+    genre: '',
+    isbncode: ''
+  });
 
   const [message, setMessage] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const handleAdd = (e) => {
-    e.preventDefault();
+  // ADD BOOK
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
 
-    if (!title.trim() || !author.trim() || !genre.trim()) {
-      setMessage('Please fill in all book details.');
-      return;
-    }
+    navigate("/");
+};
+const handleAdd = async (e) => {
+  e.preventDefault();
 
-    addBook(title.trim(), author.trim(), genre.trim());
+  if (!title.trim() || !author.trim() || !genre.trim() || !isbncode.trim()) {
+    setMessage("Please fill in all book details.");
+    return;
+  }
 
-    setTitle('');
-    setAuthor('');
-    setGenre('');
-    setMessage('Book added successfully.');
-  };
+  try {
+    setSaving(true);
+    setMessage("");
 
-  const handleUpdate = (e) => {
-    e.preventDefault();
-
-    const book = books.find(
-      b => b.id === Number(bookId)
+    // Step 1: Save the book in MongoDB
+    const response = await axios.post(
+      "http://localhost:3000/addbook",
+      {
+        title: title.trim(),
+        author: author.trim(),
+        genre: genre.trim(),
+        isbncode: isbncode.trim(),
+      }
     );
 
-    if (!book) {
-      setMessage('Book ID not found.');
-      return;
+    // Step 2: Show successful database save
+    setMessage(response.data.message || "Book added successfully.");
+
+    setTitle("");
+    setAuthor("");
+    setGenre("");
+    setIsbn("");
+
+    // Step 3: Refresh the list separately
+    try {
+      await fetchBooks();
+    } catch (refreshError) {
+      console.error("Book list refresh error:", refreshError);
+      setMessage("Book saved successfully, but refreshing the list failed.");
     }
+  } catch (error) {
+    console.error("Add book error:", error.response?.data || error.message);
+
+    setMessage(
+      error.response?.data?.message || "Failed to add book."
+    );
+  } finally {
+    setSaving(false);
+  }
+};
+
+
+  // OPEN UPDATE POPUP
+  const openUpdatePopup = (book) => {
+    setEditingBook(book);
+
+    setEditForm({
+      title: book.title || '',
+      author: book.author || '',
+      genre: book.genre || '',
+      isbncode: book.isbncode || ''
+    });
+
+    setMessage('');
+  };
+
+  // UPDATE BOOK IN DATABASE
+  const handleUpdate = async (e) => {
+    e.preventDefault();
 
     if (
-      !newTitle.trim() ||
-      !newAuthor.trim() ||
-      !newGenre.trim()
+      !editForm.title.trim() ||
+      !editForm.author.trim() ||
+      !editForm.genre.trim() ||
+      !editForm.isbncode.trim()
     ) {
-      setMessage('Enter all the updated details.');
+      setMessage('Please fill in all updated details.');
       return;
     }
 
-    updateBook(
-      bookId,
-      newTitle.trim(),
-      newAuthor.trim(),
-      newGenre.trim()
-    );
+    try {
+      setSaving(true);
 
-    setBookId('');
-    setNewTitle('');
-    setNewAuthor('');
-    setNewGenre('');
-    setMessage('Book updated successfully.');
+      const id = editingBook._id || editingBook.id;
+
+      const updatedData = {
+        title: editForm.title.trim(),
+        author: editForm.author.trim(),
+        genre: editForm.genre.trim(),
+        isbncode: editForm.isbncode.trim()
+      };
+
+      const response = await axios.put(
+        `http://localhost:3000/updatebook/${id}`,
+        updatedData
+      );
+
+      await fetchBooks();
+
+      setEditingBook(null);
+
+      setMessage(
+        response.data.message || 'Book updated successfully.'
+      );
+    } catch (error) {
+      setMessage(
+        error.response?.data?.message || 'Failed to update book.'
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDelete = (id) => {
-    deleteBook(id);
-    setMessage(`Book ID ${id} deleted.`);
+  // DELETE BOOK FROM DATABASE
+  const handleDelete = async (book) => {
+    const id = book._id || book.id;
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${book.title}"?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setSaving(true);
+
+      const response = await axios.delete(
+        `http://localhost:3000/deletebook/${id}`
+      );
+
+      await fetchBooks();
+
+      setMessage(
+        response.data.message || 'Book deleted successfully.'
+      );
+    } catch (error) {
+      setMessage(
+        error.response?.data?.message || 'Failed to delete book.'
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <>
-     <div className="admin_side">
+    <div className="admin_side">
       <h1>Welcome to Library</h1>
       <h2>Admin Dashboard</h2>
 
       {message && <p className="message">{message}</p>}
 
-      <div className="form-grid">
-        <section className="panel">
-          <h3>Add Book</h3>
+      {/* ADD BOOK */}
+      <section className="panel">
+        <h3>Add Book</h3>
 
-          <form onSubmit={handleAdd}>
-            <input
-              placeholder="Book Title"
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-            />
+        <form onSubmit={handleAdd}>
+          <input
+            placeholder="Book Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
 
-            <input
-              placeholder="Author"
-              value={author}
-              onChange={e => setAuthor(e.target.value)}
-            />
+          <input
+            placeholder="Author"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            required
+          />
 
-            <input
-              placeholder="Genre"
-              value={genre}
-              onChange={e => setGenre(e.target.value)}
-            />
+          <input
+            placeholder="Genre"
+            value={genre}
+            onChange={(e) => setGenre(e.target.value)}
+            required
+          />
 
-            <button type="submit">Add Book</button>
-          </form>
-        </section>
+          <input
+            placeholder="ISBN Code"
+            value={isbncode}
+            onChange={(e) => setIsbn(e.target.value)}
+            required
+          />
 
-        <section className="panel">
-          <h3>Update Book</h3>
+          <button type="submit" disabled={saving}>
+            {saving ? 'Please wait...' : 'Add Book'}
+          </button>
+        </form>
+      </section>
 
-          <form onSubmit={handleUpdate}>
-            <input
-              type="number"
-              min="1"
-              placeholder="Existing Book ID"
-              value={bookId}
-              onChange={e => setBookId(e.target.value)}
-            />
-
-            <input
-              placeholder="New Title"
-              value={newTitle}
-              onChange={e => setNewTitle(e.target.value)}
-            />
-
-            <input
-              placeholder="New Author"
-              value={newAuthor}
-              onChange={e => setNewAuthor(e.target.value)}
-            />
-
-            <input
-              placeholder="New Genre"
-              value={newGenre}
-              onChange={e => setNewGenre(e.target.value)}
-            />
-
-            <button type="submit">Update Book</button>
-          </form>
-        </section>
-      </div>
-
+      {/* BOOK LIST */}
       <section className="panel">
         <h3>Book List ({books.length})</h3>
 
@@ -152,12 +228,29 @@ function AdminSide() {
           <p>No books available. Add a book above.</p>
         ) : (
           <div className="book-grid">
-            {books.map(book => (
-              <div className="book-card" key={book.id}>
+            {books.map((book) => (
+              <div
+                className="book-card"
+                key={book._id || book.id}
+              >
                 <h3>{book.title}</h3>
-                <p><strong>Book ID:</strong> {book.id}</p>
-                <p><strong>Author:</strong> {book.author}</p>
-                <p><strong>Genre:</strong> {book.genre}</p>
+
+                <p>
+                  <strong>Book ID:</strong>{' '}
+                  {book._id || book.id}
+                </p>
+
+                <p>
+                  <strong>Author:</strong> {book.author}
+                </p>
+
+                <p>
+                  <strong>Genre:</strong> {book.genre}
+                </p>
+
+                <p>
+                  <strong>ISBN:</strong> {book.isbncode || 'N/A'}
+                </p>
 
                 <p>
                   <strong>Status:</strong>{' '}
@@ -166,23 +259,128 @@ function AdminSide() {
                     : 'Available'}
                 </p>
 
-                <button
-                  type="button"
-                  className="danger"
-                  onClick={() => handleDelete(book.id)}
-                >
-                  Delete Book
-                </button>
+                <div className="book-actions">
+                  <button
+                    type="button"
+                    disabled={saving}
+                    onClick={() => openUpdatePopup(book)}
+                  >
+                    Update Book
+                  </button>
+
+                  <button
+                    type="button"
+                    className="danger"
+                    disabled={saving}
+                    onClick={() => handleDelete(book)}
+                  >
+                    Delete Book
+                  </button>
+                </div>
               </div>
             ))}
           </div>
-        )}                                    
-        <NavLink to="/" className="logout-button">
-          Logout
-        </NavLink>
+        )}
+
+        <button className="logout-button" onClick={handleLogout}>
+          Logout</button>
       </section>
-      </div>
-    </>
+
+      {/* UPDATE POPUP */}
+      {editingBook && (
+        <div
+          className="update-overlay"
+          onClick={() => {
+            if (!saving) setEditingBook(null);
+          }}
+        >
+          <div
+            className="update-popup"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="close-popup"
+              disabled={saving}
+              onClick={() => setEditingBook(null)}
+            >
+              &times;
+            </button>
+
+            <h2>Update Book</h2>
+
+            <p>
+              Book ID: {editingBook._id || editingBook.id}
+            </p>
+
+            <form onSubmit={handleUpdate}>
+              <input
+                placeholder="Book Title"
+                value={editForm.title}
+                onChange={(e) =>
+                  setEditForm({
+                    ...editForm,
+                    title: e.target.value
+                  })
+                }
+                required
+              />
+
+              <input
+                placeholder="Author"
+                value={editForm.author}
+                onChange={(e) =>
+                  setEditForm({
+                    ...editForm,
+                    author: e.target.value
+                  })
+                }
+                required
+              />
+
+              <input
+                placeholder="Genre"
+                value={editForm.genre}
+                onChange={(e) =>
+                  setEditForm({
+                    ...editForm,
+                    genre: e.target.value
+                  })
+                }
+                required
+              />
+
+              <input
+                placeholder="ISBN Code"
+                value={editForm.isbncode}
+                onChange={(e) =>
+                  setEditForm({
+                    ...editForm,
+                    isbncode: e.target.value
+                  })
+                }
+                required
+              />
+
+              <div className="popup-actions">
+                <button type="submit" disabled={saving}>
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </button>
+
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  disabled={saving}
+                  onClick={() => setEditingBook(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
